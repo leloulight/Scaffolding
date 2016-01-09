@@ -1,11 +1,16 @@
 {
+<<<<<<< HEAD
   "version": "1.0.0-rc1-final",
+=======
+  "version": "1.0.0-*",
+>>>>>>> refs/remotes/aspnet/dev
   "compilationOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration.Sources": {
+<<<<<<< HEAD
       "version": "1.0.0-rc1-final",
       "type": "build"
     },
@@ -31,3 +36,31 @@
     }
   }
 }
+=======
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.AspNet.Razor": "4.0.0-*",
+    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.IO": "",
+        "System.Text.Encoding": "",
+        "System.Threading.Tasks": ""
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "System.IO": "4.0.11-*",
+        "System.Dynamic.Runtime": "4.0.11-*",
+        "System.Collections.Concurrent": "4.0.11-*",
+        "System.Reflection.TypeExtensions": "4.1.0-*"
+      }
+    }
+  }
+}
+>>>>>>> refs/remotes/aspnet/dev

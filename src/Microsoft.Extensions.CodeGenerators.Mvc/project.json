@@ -1,10 +1,15 @@
 {
+<<<<<<< HEAD
   "version": "1.0.0-rc1-final",
+=======
+  "version": "1.0.0-*",
+>>>>>>> refs/remotes/aspnet/dev
   "compilationOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
+<<<<<<< HEAD
     "Microsoft.Extensions.CodeGeneration": "1.0.0-rc1-final",
     "Microsoft.Extensions.CodeGeneration.Sources": {
       "version": "1.0.0-rc1-final",
@@ -19,6 +24,22 @@
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-beta-23516"
+=======
+    "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
+    "Newtonsoft.Json": "6.0.6"
+  },
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Runtime": "4.0.21-*"
+>>>>>>> refs/remotes/aspnet/dev
       }
     }
   },
@@ -26,4 +47,8 @@
     "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
     "Templates/": "Templates/"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> refs/remotes/aspnet/dev

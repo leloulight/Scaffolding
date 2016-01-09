@@ -33,15 +33,50 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
         // However for it to be effective, it should be property dependecy injection rather
         // than constructor injection.
         public ViewGenerator(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            IModelTypesLocator modelTypesLocator,
+            IEntityFrameworkService entityFrameworkService,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
             : base(environment)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (entityFrameworkService == null)
+            {
+                throw new ArgumentNullException(nameof(entityFrameworkService));
+            }
+
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             _libraryManager = libraryManager;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
@@ -62,16 +97,21 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             }
         }
 
-        public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
+        public async Task GenerateCode(ViewGeneratorModel viewGeneratorModel)
         {
+            if (viewGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewGeneratorModel));
+            }
+
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
-                throw new ArgumentException("The ViewName cannot be empty");
+                throw new ArgumentException(CodeGenerators.Mvc.MessageStrings.ViewNameRequired);
             }
 
             if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
             {
-                throw new ArgumentException("The TemplateName cannot be empty");
+                throw new ArgumentException(CodeGenerators.Mvc.MessageStrings.TemplateNameRequired);
             }
 
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
@@ -110,8 +150,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
-                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
-                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+                throw new Exception(string.Format("{0} {1}", CodeGenerators.Mvc.MessageStrings.ScaffoldingSuccessful_unregistered, CodeGenerators.Mvc.MessageStrings.Scaffolding_additionalSteps));
             }
         }
 
@@ -122,7 +161,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
+            Contract.Assert(model != null, CodeGenerators.Mvc.MessageStrings.ValidationSuccessfull_modelUnset);
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 

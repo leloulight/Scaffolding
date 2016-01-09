@@ -4,14 +4,19 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
     public class ActionInvoker
     {
-        public ActionInvoker([NotNull]ActionDescriptor descriptor)
+        public ActionInvoker(ActionDescriptor descriptor)
         {
+            if (descriptor == null)
+            {
+                throw new ArgumentNullException(nameof(descriptor));
+            }
+
             ActionDescriptor = descriptor;
         }
 
@@ -80,7 +85,7 @@ namespace Microsoft.Extensions.CodeGeneration
                     {
                         ex = ex.GetBaseException();
                     }
-                    
+
                     throw new InvalidOperationException(ex.Message);
                 }
 

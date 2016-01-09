@@ -1,10 +1,20 @@
 {
+<<<<<<< HEAD
   "frameworks": {
     "dnx451": {},
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-beta-23516"
       }
+=======
+    "frameworks": {
+        "dnx451": { },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Runtime": "4.0.21-*"
+            }
+        }
+>>>>>>> refs/remotes/aspnet/dev
     }
   }
 }

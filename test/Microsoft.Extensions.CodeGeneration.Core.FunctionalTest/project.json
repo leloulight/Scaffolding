@@ -16,10 +16,29 @@
         "Moq": "4.2.1312.1622"
       }
     },
+<<<<<<< HEAD
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-beta-23516"
       }
+=======
+
+    "commands": {
+        "test": "xunit.runner.aspnet"
+    },
+
+    "frameworks": {
+        "dnx451": {
+            "dependencies": {
+                "Moq": "4.2.1312.1622"
+            }
+        },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Runtime": "4.0.21-*"
+            }
+        }
+>>>>>>> refs/remotes/aspnet/dev
     }
   }
 }

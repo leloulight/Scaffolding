@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -14,20 +14,30 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public CommandLineGenerator([NotNull]IServiceProvider serviceProvider)
+        public CommandLineGenerator(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             _serviceProvider = serviceProvider;
         }
 
-        public async Task GenerateCode([NotNull]CommandLineGeneratorModel model)
+        public async Task GenerateCode(CommandLineGeneratorModel model)
         {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
             ControllerGeneratorBase generator = null;
 
             if (string.IsNullOrEmpty(model.ModelClass))
             {
                 if (model.GenerateReadWriteActions)
                 {
-                    //Controller with Actions
+                    generator = GetGenerator<MvcControllerWithReadWriteActionGenerator>();
                 }
                 else
                 {
@@ -42,11 +52,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             if (generator != null)
             {
                 await generator.Generate(model);
-            }
-            else
-            {
-                // Just throwing as I enable this functionality, should remove it once I fill all the above...
-                throw new Exception("Functionality not yet enabled...");
             }
         }
 

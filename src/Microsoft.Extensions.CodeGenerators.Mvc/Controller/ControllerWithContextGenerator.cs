@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -27,15 +27,50 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         };
 
         public ControllerWithContextGenerator(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            IModelTypesLocator modelTypesLocator,
+            IEntityFrameworkService entityFrameworkService,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
             : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (entityFrameworkService == null)
+            {
+                throw new ArgumentNullException(nameof(entityFrameworkService));
+            }
+
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             ModelTypesLocator = modelTypesLocator;
             EntityFrameworkService = entityFrameworkService;
         }
@@ -69,8 +104,8 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
-                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
-                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+                throw new Exception(string.Format("{0} {1}" ,CodeGenerators.Mvc.MessageStrings.ScaffoldingSuccessful_unregistered,
+                    CodeGenerators.Mvc.MessageStrings.Scaffolding_additionalSteps));
             }
         }
 
@@ -120,9 +155,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             }
         }
 
-        private string GetTemplateName(CommandLineGeneratorModel generatorModel)
+        protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)
         {
-            return generatorModel.IsRestController ? "ApiControllerWithContext.cshtml" : "MvcControllerWithContext.cshtml";
+            return generatorModel.IsRestController ? Constants.ApiControllerWithContextTemplate : Constants.MvcControllerWithContextTemplate;
         }
 
         // Todo: This method is duplicated with the ViewGenerator.
@@ -132,7 +167,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
+            Contract.Assert(model != null, CodeGenerators.Mvc.MessageStrings.ValidationSuccessfull_modelUnset);
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 

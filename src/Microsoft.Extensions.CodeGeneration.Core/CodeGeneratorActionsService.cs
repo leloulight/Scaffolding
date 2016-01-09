@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public CodeGeneratorActionsService(
             ITemplating templatingService,
             IFilesLocator filesLocator)
-            :this(templatingService, filesLocator, new DefaultFileSystem())
+            : this(templatingService, filesLocator, new DefaultFileSystem())
         {
         }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentException(string.Format(
                     CultureInfo.CurrentCulture,
-                    "The provided file '{0}' does not exist. This method expects a fully qualified path of an existing file.",
+                    MessageStrings.FileNotFound,
                     sourceFilePath));
             }
 
@@ -55,9 +55,14 @@ namespace Microsoft.Extensions.CodeGeneration
         }
 
         public async Task AddFileFromTemplateAsync(string outputPath, string templateName,
-            [NotNull]IEnumerable<string> templateFolders,
-            [NotNull]object templateModel)
+            IEnumerable<string> templateFolders,
+            object templateModel)
         {
+            if (templateFolders == null)
+            {
+                throw new ArgumentNullException(nameof(templateFolders));
+            }
+
             ExceptionUtilities.ValidateStringArgument(outputPath, "outputPath");
             ExceptionUtilities.ValidateStringArgument(templateName, "templateName");
 
@@ -65,12 +70,12 @@ namespace Microsoft.Extensions.CodeGeneration
             if (string.IsNullOrEmpty(templatePath))
             {
                 throw new InvalidOperationException(string.Format(
-                    "Template file {0} not found within search paths {1}",
+                    MessageStrings.TemplateFileNotFound,
                     templateName,
                     string.Join(";", templateFolders)));
             }
 
-            Contract.Assert(_fileSystem.FileExists(templatePath));
+            Debug.Assert(_fileSystem.FileExists(templatePath));
             var templateContent = _fileSystem.ReadAllText(templatePath);
 
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
@@ -78,7 +83,7 @@ namespace Microsoft.Extensions.CodeGeneration
             if (templateResult.ProcessingException != null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "There was an error running the template {0}: {1}",
+                    MessageStrings.TemplateProcessingError,
                     templatePath,
                     templateResult.ProcessingException.Message));
             }

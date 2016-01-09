@@ -14,8 +14,7 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
-using Microsoft.Data.Entity.Metadata;
-using Microsoft.Dnx.Compilation;
+using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
@@ -36,16 +35,61 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]ILibraryExporter libraryExporter,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IAssemblyLoadContextAccessor loader,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IDbContextEditorServices dbContextEditorServices,
-            [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            ILibraryExporter libraryExporter,
+            IApplicationEnvironment environment,
+            IAssemblyLoadContextAccessor loader,
+            IModelTypesLocator modelTypesLocator,
+            IDbContextEditorServices dbContextEditorServices,
+            IPackageInstaller packageInstaller,
+            IServiceProvider serviceProvider,
+            ILogger logger)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (loader == null)
+            {
+                throw new ArgumentNullException(nameof(loader));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (dbContextEditorServices == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextEditorServices));
+            }
+
+            if (packageInstaller == null)
+            {
+                throw new ArgumentNullException(nameof(packageInstaller));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
             _environment = environment;
@@ -97,8 +141,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
                     // The created context would anyway fail to fetch metadata with a crypic message
                     // It's better to throw with a meaningful message
-                    throw new InvalidOperationException("Scaffolding failed to edit Startup class to register the new Context using Dependency Injection." +
-                        "Make sure there is a Startup class and a ConfigureServices method and Configuration property in it");
+                    throw new InvalidOperationException(string.Format("{0} {1}", MessageStrings.FailedToEditStartup, MessageStrings.EnsureStartupClassExists));
                 }
 
                 dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c =>
@@ -110,7 +153,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     }
                     return c;
                 });
-                
+
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
             }
@@ -134,7 +177,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
                     if (dbContextType == null)
                     {
-                        throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextFullTypeName);
+                        throw new InvalidOperationException(string.Format(MessageStrings.DbContextTypeNotFound, dbContextFullTypeName));
                     }
                 }
             }
@@ -144,7 +187,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
             if (modelType == null)
             {
-                throw new InvalidOperationException("Could not get the reflection type for Model : " + modelTypeName);
+                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, modelTypeName));
             }
 
             _logger.LogMessage("Attempting to figure out the EntityFramework metadata for the model and DbContext");
@@ -176,7 +219,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             };
         }
 
-        private Type CompileAndGetDbContext(string dbContextTypeName, Func<Compilation, Compilation> compilationModificationFunc)
+        private Type CompileAndGetDbContext(string dbContextTypeName, Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> compilationModificationFunc)
         {
             Type dbContextType;
 
@@ -193,12 +236,12 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 dbContextType = result.Assembly.GetType(dbContextTypeName);
                 if (dbContextType == null)
                 {
-                    throw new InvalidOperationException("There was an error creating/modifying a DbContext, there was no type returned after compiling the new assembly successfully");
+                    throw new InvalidOperationException(MessageStrings.DbContextCreationError_noTypeReturned);
                 }
             }
             else
             {
-                throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
+                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
             }
 
             return dbContextType;
@@ -219,7 +262,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 // How likely is the above scenario?
                 // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    "There was an error creating a DbContext, the file {0} already exists",
+                    MessageStrings.DbContextCreationError_fileExists,
                     outputPath));
             }
 
@@ -239,7 +282,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     }
                 });
 
-                throw new InvalidOperationException("Scaffolding should be run again since it needs to reload the application with the added package reference - just run the previous command one more time.");
+                throw new InvalidOperationException(MessageStrings.ScaffoldingNeedsToRerun);
             }
         }
 
@@ -265,8 +308,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
-        private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType, ModelType startupType)
+        private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, ModelType startupType)
         {
+            if (dbContextType == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextType));
+            }
+
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
             DbContext dbContextInstance;
             try
             {
@@ -289,7 +342,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             if (dbContextInstance == null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "Instance of type {0} could not be cast to DbContext",
+                    MessageStrings.TypeCastToDbContextFailed,
                     dbContextType.FullName));
             }
 
@@ -297,7 +350,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             if (entityType == null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "There is no entity type {0} on DbContext {1}",
+                    MessageStrings.NoEntityOfTypeInDbContext,
                     modelType.FullName,
                     dbContextType.FullName));
             }
@@ -307,16 +360,16 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
         {
-            var hostBuilder = new WebHostBuilder();
+            var builder = new WebApplicationBuilder();
             if (startupType != null)
             {
                 var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
                 if (reflectedStartupType != null)
                 {
-                    hostBuilder.UseStartup(reflectedStartupType);
+                    builder.UseStartup(reflectedStartupType);
                 }
             }
-            var appServices = hostBuilder.Build().ApplicationServices;
+            var appServices = builder.Build().Services;
             return appServices.GetService(dbContextType) as DbContext;
         }
     }
